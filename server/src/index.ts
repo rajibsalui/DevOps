@@ -14,8 +14,9 @@ app.get("/", (req: Request, res: Response) => {
   return res.send("It's working 🙌");
 });
 
-
-
+app.get("/health", (req: Request, res: Response) => {
+  return res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
 
 app.listen(PORT, () => console.log(`Server is running on PORT ${PORT}`));
 

@@ -1,0 +1,76 @@
+name: CI/CD — Build & Deploy to EC2 (Docker Hub)
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  # set your default repo here or override in repository variables / secrets
+  DOCKERHUB_REPO: rajibsalui/my-express-server
+
+jobs:
+  build-and-push:
+    name: Build images & push to Docker Hub
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.set-tag.outputs.IMAGE_TAG }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set IMAGE_TAG (short sha)
+        id: set-tag
+        run: |
+          # compute short sha (7 chars)
+          echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Show environment info
+        run: |
+          echo "DOCKERHUB_REPO = $DOCKERHUB_REPO"
+          echo "IMAGE_TAG = ${{ steps.set-tag.outputs.IMAGE_TAG }}"
+
+      - name: Make build script executable
+        run: |
+          if [ -f ./scripts/build-and-push.sh ]; then
+            chmod +x ./scripts/build-and-push.sh
+          else
+            echo "Error: build-and-push.sh not found in repo root." && exit 1
+          fi
+
+      - name: Build & push images (runs build-and-push.sh)
+        env:
+          DOCKERHUB_REPO: ${{ env.DOCKERHUB_REPO }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          # pass optional workflow-file arg only if you want the script to try to replace __IMAGE_TAG__ tokens
+          ./scripts/build-and-push.sh
+
+  deploy-to-ec2:
+    name: Deploy to EC2 (pull & run)
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH to EC2
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          port: ${{ secrets.EC2_SSH_PORT || 22 }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: |
+            IMAGE_TAG=${{ needs.build-and-push.outputs.image-tag }}
+            DOCKERHUB_REPO=${{ env.DOCKERHUB_REPO }}
+          script: |
+            set -euo pipefail
+            IMAGE="${DOCKERHUB_REPO}:${IMAGE_TAG}"
+            echo "Deploying image: $IMAGE to ${HOST:-remote-host}"
+            if [ ! -f ~/scripts/deploy.sh ]; then
+              echo "ERROR: ~/scripts/deploy.sh not found on the remote host. Upload it and chmod +x it."
+              exit 1
+            fi
+            chmod +x ~/scripts/deploy.sh
+            ~/scripts/deploy.sh "$IMAGE"
