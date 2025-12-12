@@ -65,8 +65,8 @@ jobs:
           port: ${{ secrets.EC2_SSH_PORT || 22 }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "server/docker-compose.yml,scripts/deploy.sh"
-          target: "/root"
-          strip_components: 1
+          target: "/home/${{ secrets.EC2_USER }}"
+          strip_components: 0
 
       - name: Deploy via SSH to EC2
         uses: appleboy/ssh-action@v0.1.8

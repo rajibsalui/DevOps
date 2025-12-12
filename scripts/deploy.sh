@@ -6,7 +6,7 @@ set -euo pipefail
 
 # Arguments
 IMAGE="${1:-}"
-APP_DIR="${2:-/root/server}"
+APP_DIR="${2:-$HOME/server}"
 SERVICE_NAME="${3:-app}"
 
 # Configuration
@@ -17,7 +17,7 @@ HEALTH_WAIT=2
 # Validate input
 if [ -z "$IMAGE" ]; then
   echo "Usage: $0 <image> [app_dir] [service_name]"
-  echo "Example: $0 username/app:abc1234 /root/server app"
+  echo "Example: $0 username/app:abc1234 ~/server app"
   exit 1
 fi
 
