@@ -54,6 +54,20 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          port: ${{ secrets.EC2_SSH_PORT || 22 }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "server/docker-compose.yml,scripts/deploy.sh"
+          target: "/root"
+          strip_components: 1
+
       - name: Deploy via SSH to EC2
         uses: appleboy/ssh-action@v0.1.8
         env:
@@ -68,10 +82,5 @@ jobs:
           script: |
             set -euo pipefail
             IMAGE="${DOCKERHUB_REPO}:${IMAGE_TAG}"
-            echo "Deploying image: $IMAGE to ${HOST:-remote-host}"
-            if [ ! -f ~/scripts/deploy.sh ]; then
-              echo "ERROR: ~/scripts/deploy.sh not found on the remote host. Upload it and chmod +x it."
-              exit 1
-            fi
             chmod +x ~/scripts/deploy.sh
             ~/scripts/deploy.sh "$IMAGE"
