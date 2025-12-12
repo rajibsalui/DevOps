@@ -10,7 +10,7 @@ APP_DIR="${2:-$HOME/server}"
 SERVICE_NAME="${3:-app}"
 
 # Configuration
-HEALTH_URL="http://127.0.0.1:8000/health"
+HEALTH_URL="http://3.109.59.94:8080/health" # Update with your server's health check URL
 HEALTH_RETRIES=15
 HEALTH_WAIT=2
 
