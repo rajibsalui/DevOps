@@ -58,7 +58,7 @@ log "Computed tag: ${TAG}"
 
 # ---------- build stage ----------
 log "Listing services from docker-compose..."
-SERVICES=$(docker compose config --services)
+SERVICES=$(docker compose -f server/docker-compose.yml config --services)
 if [[ -z "$SERVICES" ]]; then
   err "No services found in docker-compose config. Exiting."
   exit 1
@@ -99,8 +99,8 @@ EOF
 fi
 
 # Build using combined compose files (the override sets image names so built images are properly tagged)
-log "Running: docker compose -f docker-compose.yml -f ${OVERRIDE_FILE} build --pull --no-cache"
-docker compose -f docker-compose.yml -f "${OVERRIDE_FILE}" build --pull --no-cache
+log "Running: docker compose -f server/docker-compose.yml -f ${OVERRIDE_FILE} build --pull --no-cache"
+docker compose -f server/docker-compose.yml -f "${OVERRIDE_FILE}" build --pull --no-cache
 
 # ---------- docker login ----------
 log "Logging in to Docker Hub"
