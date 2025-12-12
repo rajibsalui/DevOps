@@ -60,7 +60,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           port: ${{ secrets.EC2_SSH_PORT || 22 }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           envs: |
             IMAGE_TAG=${{ needs.build-and-push.outputs.image-tag }}
             DOCKERHUB_REPO=${{ env.DOCKERHUB_REPO }}
