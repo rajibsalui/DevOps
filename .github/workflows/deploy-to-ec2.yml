@@ -69,9 +69,9 @@ jobs:
             set -euo pipefail
             IMAGE="${DOCKERHUB_REPO}:${IMAGE_TAG}"
             echo "Deploying image: $IMAGE to ${HOST:-remote-host}"
-            if [ ! -f ./scripts/deploy.sh ]; then
-              echo "ERROR: ./scripts/deploy.sh not found on the remote host. Upload it and chmod +x it."
+            if [ ! -f ~/scripts/deploy.sh ]; then
+              echo "ERROR: ~/scripts/deploy.sh not found on the remote host. Upload it and chmod +x it."
               exit 1
             fi
-            chmod +x ./scripts/deploy.sh
-            ./scripts/deploy.sh "$IMAGE"
+            chmod +x ~/scripts/deploy.sh
+            ~/scripts/deploy.sh "$IMAGE"
