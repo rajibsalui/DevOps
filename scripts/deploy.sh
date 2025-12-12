@@ -36,16 +36,19 @@ docker pull "$IMAGE"
 # Create docker-compose override to pin the image
 echo "📝 Creating docker-compose override..."
 cat > "$APP_DIR/docker-compose.override.yml" <<EOF
-version: "3.8"
 services:
   ${SERVICE_NAME}:
     image: ${IMAGE}
     restart: unless-stopped
 EOF
 
+# Stop existing containers to free up ports
+echo "🛑 Stopping existing containers..."
+cd "$APP_DIR"
+docker compose down || true
+
 # Deploy with docker-compose
 echo "🔄 Deploying containers..."
-cd "$APP_DIR"
 docker compose up -d --remove-orphans
 
 # Health check
