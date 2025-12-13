@@ -6,17 +6,12 @@ services:
     container_name: express-app
     restart: unless-stopped
     ports:
-      - "8080:8000" # Map host port 8080 to container port 8000
+      - "8080:8000"
     environment:
       - NODE_ENV=production
-      - PORT=8000  # Port inside the container
-    volumes:
-      - ./:/var/www/express-app/
-      - /var/www/express-app/node_modules
-      - /var/www/express-app/dist
+      - PORT=8000
     networks:
       - app-network
-    command: npm run dev
 
 networks:
   app-network:
