@@ -54,7 +54,7 @@ docker ps -a --format '{{.Names}}\t{{.Ports}}' | grep '8080' | awk '{print $1}' 
     docker stop "$container" 2>/dev/null || true
     docker rm -f "$container" 2>/dev/null || true
   fi
-done
+done || true
 
 # Remove all containers using the same image (regardless of name)
 echo "   Removing containers with image: ${DOCKERHUB_REPO:-rajibsalui/my-express-server}..."
@@ -64,7 +64,7 @@ docker ps -a --filter "ancestor=${DOCKERHUB_REPO:-rajibsalui/my-express-server}"
     docker stop "$container" 2>/dev/null || true
     docker rm -f "$container" 2>/dev/null || true
   fi
-done
+done || true
 
 # Stop any docker-compose managed containers
 docker compose down 2>/dev/null || true
