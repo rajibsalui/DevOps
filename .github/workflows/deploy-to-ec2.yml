@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'server/**'
+      - '.github/workflows/deploy-to-ec2.yml'
 
 env:
   # set your default repo here or override in repository variables / secrets
