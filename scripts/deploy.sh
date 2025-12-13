@@ -42,10 +42,32 @@ services:
     restart: unless-stopped
 EOF
 
-# Stop existing containers to free up ports
+# Stop and remove existing containers
 echo "🛑 Stopping existing containers..."
 cd "$APP_DIR"
-docker compose down || true
+
+# Remove all containers using port 8080
+echo "   Removing all containers using port 8080..."
+docker ps -a --format '{{.Names}}\t{{.Ports}}' | grep '8080' | awk '{print $1}' | while read container; do
+  if [ -n "$container" ]; then
+    echo "   Stopping and removing: $container"
+    docker stop "$container" 2>/dev/null || true
+    docker rm -f "$container" 2>/dev/null || true
+  fi
+done
+
+# Remove all containers using the same image (regardless of name)
+echo "   Removing containers with image: ${DOCKERHUB_REPO:-rajibsalui/my-express-server}..."
+docker ps -a --filter "ancestor=${DOCKERHUB_REPO:-rajibsalui/my-express-server}" --format '{{.Names}}' | while read container; do
+  if [ -n "$container" ]; then
+    echo "   Stopping and removing: $container"
+    docker stop "$container" 2>/dev/null || true
+    docker rm -f "$container" 2>/dev/null || true
+  fi
+done
+
+# Stop any docker-compose managed containers
+docker compose down 2>/dev/null || true
 
 # Deploy with docker-compose
 echo "🔄 Deploying containers..."
